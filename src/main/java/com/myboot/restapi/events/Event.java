@@ -8,8 +8,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.myboot.restapi.accounts.Account;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,4 +62,8 @@ public class Event {
 			this.offline = true;
 		}
 	}
+	
+	//Account와 관계설정
+	@ManyToOne
+	 private Account manager;
 }
