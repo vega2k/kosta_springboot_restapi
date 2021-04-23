@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.myboot.restapi.accounts.Account;
 import com.myboot.restapi.accounts.AccountAdapter;
+import com.myboot.restapi.accounts.CurrentUser;
 import com.myboot.restapi.common.ErrorsResource;
 
 @Controller
@@ -89,7 +90,7 @@ public class EventController {
 	// Event 목록
 	@GetMapping
 	public ResponseEntity<?> queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler, 
-			@AuthenticationPrincipal(expression = "account") Account account) {
+			@CurrentUser Account account) {
 		Page<Event> page = this.eventRepository.findAll(pageable);
 		// PagedModel<EntityModel<Event>> pagedModel = assembler.toModel(page);
 		/*
