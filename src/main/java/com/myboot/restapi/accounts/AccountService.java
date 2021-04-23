@@ -36,15 +36,9 @@ public class AccountService implements UserDetailsService {
 		// exceptionSupplier) throws X extends Throwable
 		Account account = accountRepository.findByEmail(username)
 				.orElseThrow(() -> new UsernameNotFoundException(username));
-		// User(java.lang.String username, java.lang.String password,
-		// java.util.Collection<? extends GrantedAuthority> authorities)
-		return new User(account.getEmail(), account.getPassword(), authorities(account.getRoles()));
+		return new AccountAdapter(account);
 	}
 
-	private Collection<? extends GrantedAuthority> authorities(Set<AccountRole> roles) {
-		// Set<AccountRole> -> Stream<AccountRole> -> Stream<SimpleGrantedAuthority> ->
-		// Collection<SimpleGrantedAuthority>
-		return roles.stream().map(accountRole -> new SimpleGrantedAuthority(accountRole.name())).collect(toSet());
-	}
+
 
 }
