@@ -15,8 +15,8 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.myboot.restapi.accounts.Account;
-import com.myboot.restapi.accounts.AccountAdapter;
 import com.myboot.restapi.accounts.CurrentUser;
 import com.myboot.restapi.common.ErrorsResource;
 
@@ -47,7 +46,7 @@ public class EventController {
 	// Event 수정
 	@PutMapping("/{id}")
 	public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto,
-			Errors errors) {
+			Errors errors, @CurrentUser Account currentUser) {
 		// 1. id(pk)로 Event를 조회
 		Optional<Event> optionalEvent = this.eventRepository.findById(id);
 		// 2. Optional에 담겨진 Event 객체가 null 이면 404 Error 발생시킨다
@@ -65,6 +64,11 @@ public class EventController {
 		}
 		// 5. Optional에 담겨진 Event 객체를 꺼낸다
 		Event existingEvent = optionalEvent.get();
+		
+		// 5.5 Event를 등록한 사용자만 Event를 수정할 수 있다
+		if((existingEvent.getManager() != null) && (!existingEvent.getManager().equals(currentUser))) {
+				 return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+		}
 		// 6. 수정하려는 데이터를 담고 있는 EventDto와 DB에서 읽어온 Event를 매핑한다
 		this.modelMapper.map(eventDto, existingEvent);
 		// 7. DB에 수정 요청을 한다

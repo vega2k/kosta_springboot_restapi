@@ -10,7 +10,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.myboot.restapi.accounts.Account;
+import com.myboot.restapi.accounts.AccountSerializer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,5 +67,6 @@ public class Event {
 	
 	//Account와 관계설정
 	@ManyToOne
+	@JsonSerialize(using = AccountSerializer.class)
 	private Account manager;
 }

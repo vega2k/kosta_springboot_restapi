@@ -12,6 +12,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -34,6 +36,7 @@ public class Account {
 	@Column(unique = true)
 	private String email;
 	
+	//@JsonIgnore
 	private String password;
 	
 	@ElementCollection(fetch = FetchType.EAGER)
