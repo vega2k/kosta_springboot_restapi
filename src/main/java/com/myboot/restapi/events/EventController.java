@@ -46,36 +46,37 @@ public class EventController {
 
 	// Event 수정
 	@PutMapping("/{id}")
-	public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors) {
-		//1. id(pk)로 Event를 조회
+	public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto,
+			Errors errors) {
+		// 1. id(pk)로 Event를 조회
 		Optional<Event> optionalEvent = this.eventRepository.findById(id);
-		//2. Optional에 담겨진 Event 객체가 null 이면 404 Error 발생시킨다
+		// 2. Optional에 담겨진 Event 객체가 null 이면 404 Error 발생시킨다
 		if (optionalEvent.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
-		//3. Validation에서 제공하는 어노테이션을 사용해서 입력항목 검증에 실패하면 400 Error 발생시킨다
+		// 3. Validation에서 제공하는 어노테이션을 사용해서 입력항목 검증에 실패하면 400 Error 발생시킨다
 		if (errors.hasErrors()) {
 			return badRequest(errors);
 		}
-		//4. 사용자정의 Validator를 사용해서 입력항목의 검증(로직체크)에 실패하면 400 Error 발생시킨다
+		// 4. 사용자정의 Validator를 사용해서 입력항목의 검증(로직체크)에 실패하면 400 Error 발생시킨다
 		this.eventValidator.validate(eventDto, errors);
 		if (errors.hasErrors()) {
 			return badRequest(errors);
 		}
-		//5. Optional에 담겨진 Event 객체를 꺼낸다
+		// 5. Optional에 담겨진 Event 객체를 꺼낸다
 		Event existingEvent = optionalEvent.get();
-		//6. 수정하려는 데이터를 담고 있는 EventDto와 DB에서 읽어온 Event를 매핑한다
+		// 6. 수정하려는 데이터를 담고 있는 EventDto와 DB에서 읽어온 Event를 매핑한다
 		this.modelMapper.map(eventDto, existingEvent);
-		//7. DB에 수정 요청을 한다
+		// 7. DB에 수정 요청을 한다
 		Event savedEvent = this.eventRepository.save(existingEvent);
-		//8. 수정된 Event객체를 EventResource로 Wrapping 해서 반환한다
+		// 8. 수정된 Event객체를 EventResource로 Wrapping 해서 반환한다
 		EventResource eventResource = new EventResource(savedEvent);
 		return ResponseEntity.ok(eventResource);
 	}
 
 	// Event id로 1개 조회
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getEvent(@PathVariable Integer id) {
+	public ResponseEntity<?> getEvent(@PathVariable Integer id, @CurrentUser Account currentUser) {
 		Optional<Event> optionalEvent = this.eventRepository.findById(id);
 		// Optional에 담겨진 Event 객체가 null 이냐?
 		if (optionalEvent.isEmpty()) {
@@ -84,12 +85,17 @@ public class EventController {
 		}
 		Event event = optionalEvent.get();
 		EventResource eventResource = new EventResource(event);
+		
+		//로그인 한 상태이면 update 링크를 추가해라
+		if ((event.getManager() != null) && (event.getManager().equals(currentUser))) {
+			eventResource.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
+		}
 		return ResponseEntity.ok(eventResource);
 	}
 
 	// Event 목록
 	@GetMapping
-	public ResponseEntity<?> queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler, 
+	public ResponseEntity<?> queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler,
 			@CurrentUser Account account) {
 		Page<Event> page = this.eventRepository.findAll(pageable);
 		// PagedModel<EntityModel<Event>> pagedModel = assembler.toModel(page);
@@ -102,7 +108,7 @@ public class EventController {
 		 */
 		PagedModel<RepresentationModel<EventResource>> pagedModel = assembler.toModel(page,
 				event -> new EventResource(event));
-		if(account != null) {
+		if (account != null) {
 			pagedModel.add(linkTo(EventController.class).withRel("create-event"));
 		}
 		return ResponseEntity.ok(pagedModel);
@@ -110,7 +116,8 @@ public class EventController {
 
 	// Event 등록
 	@PostMapping
-	public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors, @CurrentUser Account currentUser) {
+	public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors,
+			@CurrentUser Account currentUser) {
 		// Validation API에서 제공하는 어노테이션을 사용해서 입력검증 체크
 		if (errors.hasErrors()) {
 			return badRequest(errors);
