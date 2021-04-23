@@ -22,9 +22,23 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 				.and()
 			.authorizeRequests()
 				.mvcMatchers(HttpMethod.GET, "/api/**").permitAll()
+				.antMatchers(AUTH_LIST).permitAll()
 				.anyRequest().authenticated()
 				.and()
 			.exceptionHandling()
 				.accessDeniedHandler(new OAuth2AccessDeniedHandler());
 	}
+	
+	private static final String[] AUTH_LIST = { 
+			 "/v2/api-docs", 
+			 "/configuration/ui", 
+			 "/swagger-resources/**", 
+			 "/configuration/security", 
+			 "/swagger-ui.html", 
+			 "/swagger-ui/**",
+			 "/webjars/**" 
+	};
+	
+	
+
 }
