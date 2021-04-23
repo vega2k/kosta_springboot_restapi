@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.myboot.restapi.accounts.Account;
 import com.myboot.restapi.accounts.AccountAdapter;
 import com.myboot.restapi.common.ErrorsResource;
 
@@ -88,19 +89,19 @@ public class EventController {
 	// Event 목록
 	@GetMapping
 	public ResponseEntity<?> queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler, 
-			@AuthenticationPrincipal AccountAdapter currentUser) {
+			@AuthenticationPrincipal(expression = "account") Account account) {
 		Page<Event> page = this.eventRepository.findAll(pageable);
 		// PagedModel<EntityModel<Event>> pagedModel = assembler.toModel(page);
 		/*
 		 * PagedResourcesAssembler<T> 의 toModel() 메서드 toModel(Page<T> page,
 		 * org.springframework.hateoas.server.RepresentationModelAssembler<T,R>
-		 * assembler) RepresentationModelAssembler 가 함수형 인터페이스이고 D toModel(T entity) 를
+		 * assembler) RepresentationModelAssembler 가 함수형 인터페이스이고 D toModel(T entity)를
 		 * 재정의 할때 람다식을 사용해야 한다.\ Converts the given entity into a D, which extends
 		 * RepresentationModel. Event -> EventResource Wrapping 해야 한다.
 		 */
 		PagedModel<RepresentationModel<EventResource>> pagedModel = assembler.toModel(page,
 				event -> new EventResource(event));
-		if(currentUser != null) {
+		if(account != null) {
 			pagedModel.add(linkTo(EventController.class).withRel("create-event"));
 		}
 		return ResponseEntity.ok(pagedModel);
