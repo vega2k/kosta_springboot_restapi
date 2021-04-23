@@ -110,7 +110,7 @@ public class EventController {
 
 	// Event 등록
 	@PostMapping
-	public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+	public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors, @CurrentUser Account currentUser) {
 		// Validation API에서 제공하는 어노테이션을 사용해서 입력검증 체크
 		if (errors.hasErrors()) {
 			return badRequest(errors);
@@ -126,6 +126,8 @@ public class EventController {
 
 		// offline, free 값을 설정
 		event.update();
+		// Event의 manager변수에 Account 객체 저장
+		event.setManager(currentUser);
 
 		Event addEvent = eventRepository.save(event);
 

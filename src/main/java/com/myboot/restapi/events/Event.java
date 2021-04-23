@@ -65,5 +65,5 @@ public class Event {
 	
 	//Account와 관계설정
 	@ManyToOne
-	 private Account manager;
+	private Account manager;
 }
