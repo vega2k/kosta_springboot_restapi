@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.myboot.restapi.accounts.Account;
 import com.myboot.restapi.accounts.AccountRole;
 import com.myboot.restapi.accounts.AccountService;
+import com.myboot.restapi.common.AppProperties;
 
 @Configuration
 public class AppConfig {
@@ -34,12 +35,15 @@ public class AppConfig {
 		return new ApplicationRunner() {
 			@Autowired
 			AccountService accountService;
+			
+			@Autowired
+			AppProperties appProperties;
 
 			@Override
 			public void run(ApplicationArguments args) throws Exception {
 				Account account = Account.builder()
-									.email("user@email.com")
-									.password("user")
+									.email(appProperties.getUserUsername())
+									.password(appProperties.getUserPassword())
 									.roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
 									.build();
 				accountService.saveAccount(account);
